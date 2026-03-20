@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Sistema Industrial de Gerenciamento de Produção">
+    <meta name="theme-color" content="#00c853">
+    
+    <title>{% block title %}Sistema Industrial{% endblock %}</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <!-- Background Effects -->
+    <div class="bg-effects">
+        <div class="bg-orb bg-orb-1"></div>
+        <div class="bg-orb bg-orb-2"></div>
+        <div class="bg-orb bg-orb-3"></div>
+    </div>
+
+    <!-- Header Principal -->
+    <header class="main-header">
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-industry"></i>
+                <h1>Sistema Industrial</h1>
+            </div>
+            <div class="header-badge">
+                <span class="badge-live">
+                    <span class="pulse"></span>
+                    Online
+                </span>
+            </div>
+        </div>
+    </header>
+<header>
+<!-- Botão hamburguer -->
+<button id="hamburger" style="position: fixed; top: 10px; right: 20px; z-index: 1100; background: #00c853; border: none; color: white; font-size: 24px; padding: 8px 12px; border-radius: 6px; cursor: pointer;">
+  ☰
+</button>
+
+<!-- Navbar -->
+<nav id="navbar" style="
+    background: rgba(24,28,36,0.9);
+    padding: 10px 20px;
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    backdrop-filter: blur(15px);
+    position: fixed;
+    top: -100px; /* inicialmente fora da tela */
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    transition: top 0.4s ease-in-out;
+">
+  <a href="/">Dashboard</a>
+  <a href="/manutencao">Manutenção</a>
+  <a href="/operadores">Operadores</a>
+  <a href="/maquinas">Máquinas</a>
+  <a href="/relatorios">Relatórios</a>
+  <a href="/admin">Admin</a>
+</nav>
+
+<script>
+const hamburger = document.getElementById('hamburger');
+const nav = document.getElementById('navbar');
+
+hamburger.addEventListener('click', () => {
+  nav.classList.toggle('active');
+});
+
+// CSS para nav.active (mostra o menu)
+const style = document.createElement('style');
+style.innerHTML = `
+  #navbar.active {
+    top: 0;
+  }
+  #navbar a {
+    color: #a1a1aa;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+  }
+  #navbar a:hover {
+    color: #ffffff;
+    background: rgba(0,200,83,0.1);
+  }
+`;
+document.head.appendChild(style);
+</script>
+<script>
+    const hamburgerBtn = document.getElementById('hamburger-btn');
+    const navbar = document.getElementById('navbar');
+
+    hamburgerBtn.addEventListener('click', () => {
+        navbar.classList.toggle('active');
+    });
+</script>
+    <!-- Navegação Premium -->
+    <nav class="main-nav">
+        <div class="nav-container">
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <a href="/" class="nav-link">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/maquinas" class="nav-link">
+                        <i class="fas fa-cogs"></i>
+                        <span>Máquinas</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/operadores" class="nav-link">
+                        <i class="fas fa-users"></i>
+                        <span>Operadores</span>
+                    </a>
+             
+                <li class="nav-item">
+                    <a href="/manutencao" class="nav-link">
+                        <i class="fas fa-tools"></i>
+                        <span>Manutenção</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/relatorios" class="nav-link">
+                        <i class="fas fa-file-alt"></i>
+                        <span>Relatórios</span>
+                    </a>
+                </li>
+                {% if session.get('admin') %}
+                <li class="nav-item nav-item-admin">
+                    <a href="/admin" class="nav-link nav-link-admin">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Painel Admin</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/logout_admin" class="nav-link nav-link-logout">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Sair</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="nav-item nav-item-admin">
+                    <a href="/login_admin" class="nav-link nav-link-admin">
+                        <i class="fas fa-user-shield"></i>
+                        <span>Admin</span>
+                    </a>
+                    <button id="toggle-nav" class="action-btn">
+    <i class="fas fa-bars"></i> Menu
+</button>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Conteúdo Principal -->
+    <main class="main-content">
+        <div class="content-wrapper">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <!-- Footer Premium -->
+    <footer class="main-footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <i class="fas fa-industry"></i>
+                <span>Sistema Industrial</span>
+            </div>
+            <div class="footer-info">
+                <p>&copy; 2026 Projeto Produção Industrial. Todos os direitos reservados.</p>
+            </div>
+            <div class="footer-links">
+                <a href="#"><i class="fas fa-question-circle"></i> Ajuda</a>
+                <a href="#"><i class="fas fa-envelope"></i> Contato</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Flash Messages Container -->
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <div class="flash-container">
+            {% for message in messages %}
+                <div class="flash-message flash-success">
+                    <i class="fas fa-check-circle"></i>
+                    <span>{{ message }}</span>
+                    <button class="flash-close" onclick="this.parentElement.remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Scripts Globais -->
+    <script>
+        // Adicionar classe loaded ao body após carregamento
+        window.addEventListener('load', () => {
+            document.body.classList.add('loaded');
+        });
+
+        // Auto-remover flash messages após 5 segundos
+        document.querySelectorAll('.flash-message').forEach(msg => {
+            setTimeout(() => {
+                msg.style.animation = 'flashSlideOut 0.5s ease forwards';
+                setTimeout(() => msg.remove(), 500);
+            }, 5000);
+        });
+    </script>
+
+</body>
+
+</html>

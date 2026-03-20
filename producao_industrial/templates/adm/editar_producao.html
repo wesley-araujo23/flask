@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h1>Editar Produção</h1>
+
+<form method="POST">
+    <input name="quantidade" value="{{ producao.quantidade }}" required>
+    <input name="tempo" value="{{ producao.tempo }}" required>
+
+    <button type="submit">Salvar</button>
+</form>
+
+{% endblock %}

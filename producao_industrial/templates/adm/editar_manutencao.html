@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h1>Editar Manutenção</h1>
+
+<form method="POST">
+    <input name="descricao" value="{{ manutencao.descricao }}" required>
+
+    <button type="submit">Salvar</button>
+</form>
+
+{% endblock %}

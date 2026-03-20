@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+
+{% block title %}Manutenção | Sistema Industrial{% endblock %}
+
+{% block content %}
+
+<!-- Page Header -->
+<section class="page-header">
+    <div class="page-header-content">
+        <div class="page-title">
+            <i class="fas fa-tools"></i>
+            <h1>Gerenciamento de Manutenção</h1>
+        </div>
+        <div class="page-breadcrumb">
+            <span>Início</span>
+            <i class="fas fa-chevron-right"></i>
+            <span>Manutenção</span>
+        </div>
+    </div>
+</section>
+
+<!-- Register Maintenance Section -->
+<section class="register-section">
+    <div class="section-header">
+        <h2><i class="fas fa-plus-circle"></i> Registrar Nova Manutenção</h2>
+    </div>
+    
+    <div class="form-card">
+        <form method="POST" class="maintenance-form">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="maquina_id">
+                        <i class="fas fa-server"></i>
+                        Máquina
+                    </label>
+                    <div class="select-wrapper">
+                        <select name="maquina_id" id="maquina_id" required>
+                            {% for maquina in maquinas %}
+                            <option value="{{ maquina.id }}">
+                                <i class="fas fa-microchip"></i>
+                                {{ maquina.nome }} - {{ maquina.setor }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="descricao">
+                        <i class="fas fa-align-left"></i>
+                        Descrição da Manutenção
+                    </label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-clipboard-list input-icon"></i>
+                        <input 
+                            type="text" 
+                            name="descricao" 
+                            id="descricao" 
+                            placeholder="Descreva o problema ou manutenção realizada..." 
+                            required
+                        >
+                    </div>
+                </div>
+                
+                <div class="form-group form-group-btn">
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-save"></i>
+                        Registrar Manutenção
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+
+<!-- Maintenance History Section -->
+<section class="history-section">
+    <div class="section-header">
+        <h2><i class="fas fa-history"></i> Histórico de Manutenções</h2>
+        <div class="section-info">
+            <span class="info-badge">
+                <i class="fas fa-calendar-alt"></i>
+                Total: {{ manutencoes|length }} registros
+            </span>
+        </div>
+    </div>
+    
+    <div class="table-wrapper">
+        <table class="data-table data-table-maintenance">
+            <thead>
+                <tr>
+                    <th><i class="fas fa-server"></i> Máquina</th>
+                    <th><i class="fas fa-clipboard-list"></i> Descrição</th>
+                    <th><i class="fas fa-calendar-alt"></i> Data</th>
+                    <th><i class="fas fa-cogs"></i> Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in manutencoes %}
+                <tr>
+                    <td>
+                        <div class="machine-info">
+                            <div class="machine-icon">
+                                <i class="fas fa-microchip"></i>
+                            </div>
+                            <div class="machine-details">
+                                <span class="machine-id">#{{ item.maquina_id }}</span>
+                                <span class="machine-label">Máquina ID</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="description-cell">
+                            <i class="fas fa-file-alt"></i>
+                            <span>{{ item.descricao }}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="date-cell">
+                            <i class="fas fa-calendar"></i>
+                            <span>{{ item.data.strftime('%d/%m/%Y') }}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <a href="/excluir_manutencao/{{ item.id }}" 
+                               class="action-btn action-btn-delete" 
+                               title="Excluir"
+                               onclick="return confirm('Tem certeza que deseja excluir esta manutenção?');">
+                                <i class="fas fa-trash-alt"></i>
+                                <span>Excluir</span>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr class="empty-row">
+                    <td colspan="4">
+                        <div class="empty-state">
+                            <i class="fas fa-tools"></i>
+                            <h3>Nenhuma manutenção registrada</h3>
+                            <p>Comece registrando a primeira manutenção acima</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+{% endblock %}

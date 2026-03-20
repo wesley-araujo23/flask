@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h1>Editar Máquina</h1>
+
+<form method="POST">
+    <input name="nome" value="{{ maquina.nome }}" required>
+    <input name="setor" value="{{ maquina.setor }}" required>
+
+    <select name="status">
+        <option {% if maquina.status == 'Ligada' %}selected{% endif %}>Ligada</option>
+        <option {% if maquina.status == 'Parada' %}selected{% endif %}>Parada</option>
+        <option {% if maquina.status == 'Manutenção' %}selected{% endif %}>Manutenção</option>
+    </select>
+
+    <button type="submit">Salvar</button>
+</form>
+
+{% endblock %}

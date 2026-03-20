@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h1>Painel Administrativo</h1>
+
+<div class="cards">
+    <div class="card">
+        Máquinas<br>
+        {{ maquinas|length }}
+    </div>
+
+    <div class="card">
+        Operadores<br>
+        {{ operadores|length }}
+    </div>
+</div>
+
+<h2>Máquinas</h2>
+
+<table>
+    <tr>
+        <th>Nome</th>
+        <th>Setor</th>
+        <th>Status</th>
+        <th>Ações</th>
+    </tr>
+
+    {% for maquina in maquinas %}
+    <tr>
+        <td>{{ maquina.nome }}</td>
+        <td>{{ maquina.setor }}</td>
+
+        <td class="
+            {% if maquina.status == 'Ligada' %}status-ligada{% endif %}
+            {% if maquina.status == 'Parada' %}status-parada{% endif %}
+            {% if maquina.status == 'Manutenção' %}status-manutencao{% endif %}
+        ">
+            {{ maquina.status }}
+        </td>
+
+        <td>
+            <a href="/editar_maquina/{{ maquina.id }}">Editar</a> |
+            <a href="/excluir_maquina/{{ maquina.id }}">Excluir</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+<br><br>
+
+<h2>Operadores</h2>
+
+<table>
+    <tr>
+        <th>Nome</th>
+        <th>Setor</th>
+        <th>Turno</th>
+        <th>Ações</th>
+    </tr>
+
+    {% for operador in operadores %}
+    <tr>
+        <td>{{ operador.nome }}</td>
+        <td>{{ operador.setor }}</td>
+        <td>{{ operador.turno }}</td>
+
+        <td>
+            <a href="/editar_operador/{{ operador.id }}">Editar</a> |
+            <a href="/excluir_operador/{{ operador.id }}">Excluir</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}

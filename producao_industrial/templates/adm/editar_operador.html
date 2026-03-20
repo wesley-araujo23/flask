@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h1>Editar Operador</h1>
+
+<form method="POST">
+    <input name="nome" value="{{ operador.nome }}" required>
+    <input name="setor" value="{{ operador.setor }}" required>
+
+    <select name="turno">
+        <option {% if operador.turno == 'Manhã' %}selected{% endif %}>Manhã</option>
+        <option {% if operador.turno == 'Tarde' %}selected{% endif %}>Tarde</option>
+        <option {% if operador.turno == 'Noite' %}selected{% endif %}>Noite</option>
+    </select>
+
+    <button type="submit">Salvar</button>
+</form>
+
+{% endblock %}
