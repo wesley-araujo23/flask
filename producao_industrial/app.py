@@ -5,6 +5,7 @@ from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from openpyxl import Workbook
 import io
+import os
 
 # ---------------- ADMIN ----------------
 ADMIN_USER = 'admin'
@@ -25,13 +26,10 @@ def login_admin():
     if request.method == 'POST':
         usuario = request.form['usuario']
         senha = request.form['senha']
-
         if usuario == ADMIN_USER and senha == ADMIN_PASS:
             session['admin'] = True
             return redirect('/admin')
-
         flash('Login inválido')
-
     return render_template('adm/login_admin.html')
 
 @app.route('/logout_admin')
@@ -44,7 +42,6 @@ def logout_admin():
 def admin():
     if not session.get('admin'):
         return redirect('/login_admin')
-
     maquinas = Maquina.query.all()
     operadores = Operador.query.all()
     return render_template('adm/admin.html', maquinas=maquinas, operadores=operadores)
@@ -197,4 +194,5 @@ def gerar_excel():
 
 # ---------------- RUN ----------------
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))  # Porta do Render ou 5000 local
+    app.run(host="0.0.0.0", port=port, debug=True)
