@@ -1,267 +1,130 @@
 {% extends 'base.html' %}
 
-{% block title %}Relatórios Gerais | Sistema Industrial{% endblock %}
+{% block title %}Relatórios{% endblock %}
 
 {% block content %}
-
-<!-- Page Header -->
 <section class="page-header">
     <div class="page-header-content">
         <div class="page-title">
-            <i class="fas fa-file-alt"></i>
-            <h1>Relatórios Gerais</h1>
-        </div>
-        <div class="page-breadcrumb">
-            <span>Início</span>
-            <i class="fas fa-chevron-right"></i>
-            <span>Relatórios</span>
+            <i class="fas fa-chart-bar"></i>
+            <h1>Relatórios</h1>
         </div>
     </div>
 </section>
 
-<!-- Overview Cards Section -->
-<section class="overview-section">
-    <div class="overview-grid">
-        <div class="overview-card overview-card-machines">
-            <div class="overview-icon">
-                <i class="fas fa-server"></i>
-            </div>
-            <div class="overview-content">
-                <span class="overview-value">{{ total_maquinas }}</span>
-                <span class="overview-label">Máquinas</span>
-            </div>
-            <div class="overview-decoration"></div>
-        </div>
-
-        <div class="overview-card overview-card-operators">
-            <div class="overview-icon">
-                <i class="fas fa-users"></i>
-            </div>
-            <div class="overview-content">
-                <span class="overview-value">{{ total_operadores }}</span>
-                <span class="overview-label">Operadores</span>
-            </div>
-            <div class="overview-decoration"></div>
-        </div>
-
-        <div class="overview-card overview-card-production">
-            <div class="overview-icon">
-                <i class="fas fa-boxes-stacked"></i>
-            </div>
-            <div class="overview-content">
-                <span class="overview-value">{{ total_producao }}</span>
-                <span class="overview-label">Produções</span>
-            </div>
-            <div class="overview-decoration"></div>
-        </div>
-
-        <div class="overview-card overview-card-maintenance">
-            <div class="overview-icon">
-                <i class="fas fa-tools"></i>
-            </div>
-            <div class="overview-content">
-                <span class="overview-value">{{ total_manutencao }}</span>
-                <span class="overview-label">Manutenções</span>
-            </div>
-            <div class="overview-decoration"></div>
-        </div>
+<!-- Cards Overview -->
+<div class="stats-grid">
+    <div class="stat-card stat-primary">
+        <i class="fas fa-server"></i>
+        <span>{{ total_maquinas|default(0) }}</span>
+        <small>Máquinas</small>
     </div>
-</section>
-
-<!-- Detailed Report Section -->
-<section class="report-section">
-    <div class="section-header">
-        <h2><i class="fas fa-chart-pie"></i> Indicadores Detalhados</h2>
+    <div class="stat-card stat-success">
+        <i class="fas fa-users"></i>
+        <span>{{ total_operadores|default(0) }}</span>
+        <small>Operadores</small>
     </div>
-    
-    <div class="report-grid">
-        <div class="report-card">
-            <div class="report-header">
-                <div class="report-icon machines-color">
-                    <i class="fas fa-server"></i>
-                </div>
-                <div class="report-title">
-                    <h3>Total Máquinas</h3>
-                    <p>Quantidade cadastrada no sistema</p>
-                </div>
-            </div>
-            <div class="report-value">
-                <span>{{ total_maquinas }}</span>
-            </div>
-            <div class="report-bar">
-                <div class="report-bar-fill machines-fill" data-width="{{ (total_maquinas / maximo) * 100 }}"></div>
+    <div class="stat-card stat-info">
+        <i class="fas fa-box"></i>
+        <span>{{ total_producao|default(0) }}</span>
+        <small>Produções</small>
+    </div>
+    <div class="stat-card stat-warning">
+        <i class="fas fa-tools"></i>
+        <span>{{ total_manutencao|default(0) }}</span>
+        <small>Manutenções</small>
+    </div>
+</div>
+
+<!-- Gráfico Pizza -->
+<div class="chart-section">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5>Resumo Geral</h5>
+            <div>
+                <a href="/gerar_pdf" class="btn btn-sm btn-danger me-2">
+                    <i class="fas fa-file-pdf"></i> PDF
+                </a>
+                <a href="/gerar_excel" class="btn btn-sm btn-success">
+                    <i class="fas fa-file-excel"></i> Excel
+                </a>
             </div>
         </div>
-
-        <div class="report-card">
-            <div class="report-header">
-                <div class="report-icon operators-color">
-                    <i class="fas fa-users"></i>
-                </div>
-                <div class="report-title">
-                    <h3>Total Operadores</h3>
-                    <p>Colaboradores ativos</p>
-                </div>
-            </div>
-            <div class="report-value">
-                <span>{{ total_operadores }}</span>
-            </div>
-            <div class="report-bar">
-                <div class="report-bar-fill operators-fill" data-width="{{ (total_operadores / maximo) * 100 }}"></div>
-            </div>
-        </div>
-
-        <div class="report-card">
-            <div class="report-header">
-                <div class="report-icon production-color">
-                    <i class="fas fa-boxes-stacked"></i>
-                </div>
-                <div class="report-title">
-                    <h3>Total Produção</h3>
-                    <p>Registros de produção</p>
-                </div>
-            </div>
-            <div class="report-value">
-                <span>{{ total_producao }}</span>
-            </div>
-            <div class="report-bar">
-                <div class="report-bar-fill production-fill" data-width="{{ (total_producao / maximo) * 100 }}"></div>
-            </div>
-        </div>
-
-        <div class="report-card">
-            <div class="report-header">
-                <div class="report-icon maintenance-color">
-                    <i class="fas fa-tools"></i>
-                </div>
-                <div class="report-title">
-                    <h3>Total Manutenção</h3>
-                    <p>Intervenções realizadas</p>
-                </div>
-            </div>
-            <div class="report-value">
-                <span>{{ total_manutencao }}</span>
-            </div>
-            <div class="report-bar">
-                <div class="report-bar-fill maintenance-fill" data-width="{{ (total_manutencao / maximo) * 100 }}"></div>
+        <div class="card-body">
+            <div style="position: relative; height:400px;">
+                <canvas id="relatorioChart"></canvas>
             </div>
         </div>
     </div>
-</section>
+</div>
+{% endblock %}
 
-<!-- Summary Table Section -->
-<section class="table-section">
-    <div class="section-header">
-        <h2><i class="fas fa-table"></i> Resumo Consolidado</h2>
-    </div>
-    
-    <div class="table-wrapper">
-        <table class="data-table data-table-report">
-            <thead>
-                <tr>
-                    <th><i class="fas fa-chart-bar"></i> Indicador</th>
-                    <th><i class="fas fa-calculator"></i> Quantidade</th>
-                    <th><i class="fas fa-percentage"></i> Percentual</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% set total_geral = total_maquinas + total_operadores + total_producao + total_manutencao %}
-                <tr>
-                    <td>
-                        <div class="indicator-cell">
-                            <div class="indicator-icon machines-color">
-                                <i class="fas fa-server"></i>
-                            </div>
-                            <span>Total Máquinas</span>
-                        </div>
-                    </td>
-                    <td>
-                        <span class="quantity-badge machines-color">{{ total_maquinas }}</span>
-                    </td>
-                    <td>
-                        <div class="percent-cell">
-                            <div class="percent-bar">
-                                <div class="percent-fill machines-fill" data-width="{{ (total_maquinas / total_geral * 100) if total_geral > 0 else 0 }}"></div>
-                            </div>
-                        </div>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <div class="indicator-cell">
-                            <div class="indicator-icon operators-color">
-                                <i class="fas fa-users"></i>
-                            </div>
-                            <span>Total Operadores</span>
-                        </div>
-                    </td>
-                    <td>
-                        <span class="quantity-badge operators-color">{{ total_operadores }}</span>
-                    </td>
-                    <td>
-                        <div class="percent-cell">
-                            <div class="percent-bar">
-                                <div class="percent-fill operators-fill" data-width="{{ (total_operadores / total_geral * 100) if total_geral > 0 else 0 }}"></div>
-                            </div>
-                        </div>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <div class="indicator-cell">
-                            <div class="indicator-icon production-color">
-                                <i class="fas fa-boxes-stacked"></i>
-                            </div>
-                            <span>Total Produção</span>
-                        </div>
-                    </td>
-                    <td>
-                        <span class="quantity-badge production-color">{{ total_producao }}</span>
-                    </td>
-                    <td>
-                        <div class="percent-cell">
-                            <div class="percent-bar">
-                                <div class="percent-fill production-fill" data-width="{{ (total_producao / total_geral * 100) if total_geral > 0 else 0 }}"></div>
-                            </div>
-                        </div>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <div class="indicator-cell">
-                            <div class="indicator-icon maintenance-color">
-                                <i class="fas fa-tools"></i>
-                            </div>
-                            <span>Total Manutenção</span>
-                        </div>
-                    </td>
-                    <td>
-                        <span class="quantity-badge maintenance-color">{{ total_manutencao }}</span>
-                    </td>
-                    <td>
-                        <div class="percent-cell">
-                            <div class="percent-bar">
-                                <div class="percent-fill maintenance-fill" data-width="{{ (total_manutencao / total_geral * 100) if total_geral > 0 else 0 }}"></div>
-                            </div>
-                        </div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-</section>
-
-<!-- Script para aplicar as larguras das barras -->
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Aplicar larguras às barras de progresso
-    document.querySelectorAll('.report-bar-fill, .percent-fill').forEach(function(el) {
-        var width = el.getAttribute('data-width');
-        if (width) {
-            el.style.width = width + '%';
+    'use strict';
+    
+    const canvas = document.getElementById('relatorioChart');
+    if (!canvas) {
+        console.error('Canvas #relatorioChart não encontrado');
+        return;
+    }
+    
+    const ctx = canvas.getContext('2d');
+    
+    // ✅ VARIÁVEIS com valores padrão seguros
+    const totalMaquinas = parseInt('{{ total_maquinas|default(0) }}') || 0;
+    const totalOperadores = parseInt('{{ total_operadores|default(0) }}') || 0;
+    const totalProducao = parseInt('{{ total_producao|default(0) }}') || 0;
+    const totalManutencao = parseInt('{{ total_manutencao|default(0) }}') || 0;
+    
+    // ✅ ARRAY CORRETO com TODAS as vírgulas
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Máquinas', 'Operadores', 'Produção', 'Manutenção'],
+            datasets: [{
+                data: [totalMaquinas, totalOperadores, totalProducao, totalManutencao],
+                backgroundColor: [
+                    '#3b82f6',    // Azul
+                    '#10b981',    // Verde
+                    '#f59e0b',    // Amarelo
+                    '#ef4444'     // Vermelho
+                ],  // ✅ VÍRGULAS CORRETAS!
+                borderWidth: 0,
+                hoverOffset: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        usePointStyle: true,
+                        font: {
+                            size: 12
+                        }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0,0,0,0.8)',
+                    titleColor: 'white',
+                    bodyColor: 'white',
+                    callbacks: {
+                        label: function(context) {
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = total > 0 ? ((context.parsed / total) * 100).toFixed(1) : 0;
+                            return `${context.label}: ${context.parsed} (${percentage}%)`;
+                        }
+                    }
+                }
+            }
         }
     });
 });
 </script>
-
 {% endblock %}

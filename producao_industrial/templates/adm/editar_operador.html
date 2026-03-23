@@ -1,20 +1,42 @@
 {% extends 'base.html' %}
 
+{% block title %}Editar Operador{% endblock %}
+
 {% block content %}
+<section class="page-header">
+    <div class="page-header-content">
+        <div class="page-title">
+            <i class="fas fa-user-edit"></i>
+            <h1>Editar Operador</h1>
+            <p>{{ operador.nome }}</p>
+        </div>
+        <a href="/admin" class="btn btn-secondary">← Voltar</a>
+    </div>
+</section>
 
-<h1>Editar Operador</h1>
-
-<form method="POST">
-    <input name="nome" value="{{ operador.nome }}" required>
-    <input name="setor" value="{{ operador.setor }}" required>
-
-    <select name="turno">
-        <option {% if operador.turno == 'Manhã' %}selected{% endif %}>Manhã</option>
-        <option {% if operador.turno == 'Tarde' %}selected{% endif %}>Tarde</option>
-        <option {% if operador.turno == 'Noite' %}selected{% endif %}>Noite</option>
-    </select>
-
-    <button type="submit">Salvar</button>
-</form>
-
+<div class="form-card">
+    <form method="POST">
+        <div class="form-row">
+            <div class="form-group">
+                <label>👤 Nome</label>
+                <input type="text" name="nome" value="{{ operador.nome }}" required>
+            </div>
+            <div class="form-group">
+                <label>🏭 Setor</label>
+                <input type="text" name="setor" value="{{ operador.setor or '' }}">
+            </div>
+            <div class="form-group">
+                <label>🕐 Turno</label>
+                <select name="turno">
+                    <option value="Manhã" {% if operador.turno == 'Manhã' %}selected{% endif %}>☀️ Manhã</option>
+                    <option value="Tarde" {% if operador.turno == 'Tarde' %}selected{% endif %}>🌤️ Tarde</option>
+                    <option value="Noite" {% if operador.turno == 'Noite' %}selected{% endif %}>🌙 Noite</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <button type="submit" class="submit-btn">💾 Salvar</button>
+            </div>
+        </div>
+    </form>
+</div>
 {% endblock %}

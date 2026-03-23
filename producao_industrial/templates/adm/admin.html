@@ -1,76 +1,125 @@
 {% extends 'base.html' %}
 
+{% block title %}Painel Admin{% endblock %}
+
 {% block content %}
-
-<h1>Painel Administrativo</h1>
-
-<div class="cards">
-    <div class="card">
-        Máquinas<br>
-        {{ maquinas|length }}
+<section class="page-header">
+    <div class="page-header-content">
+        <div class="page-title">
+            <i class="fas fa-shield-alt"></i>
+            <h1>Painel Administrativo</h1>
+        </div>
+        <a href="/logout_admin" class="btn btn-danger">
+            <i class="fas fa-sign-out-alt"></i> Sair
+        </a>
     </div>
+</section>
 
-    <div class="card">
-        Operadores<br>
-        {{ operadores|length }}
+<!-- Cards Stats -->
+<div class="admin-stats-grid">
+    <div class="stat-card">
+        <i class="fas fa-server"></i>
+        <span>{{ maquinas|length }}</span>
+        <small>Máquinas</small>
+    </div>
+    <div class="stat-card">
+        <i class="fas fa-users"></i>
+        <span>{{ operadores|length }}</span>
+        <small>Operadores</small>
+    </div>
+    <div class="stat-card">
+        <i class="fas fa-tools"></i>
+        <span>{{ Manutencao.query.count() }}</span>
+        <small>Manutenções</small>
+    </div>
+    <div class="stat-card">
+        <i class="fas fa-box"></i>
+        <span>{{ Producao.query.count() }}</span>
+        <small>Produções</small>
     </div>
 </div>
 
-<h2>Máquinas</h2>
+<!-- Tabela Máquinas -->
+<section class="admin-table-section">
+    <h2><i class="fas fa-cogs"></i> Máquinas</h2>
+    <div class="table-wrapper">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Setor</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for maquina in maquinas %}
+                <tr>
+                    <td>{{ maquina.nome }} <small>ID: {{ maquina.id }}</small></td>
+                    <td>{{ maquina.setor }}</td>
+                    <td>
+                        <span class="status-badge status-{{ maquina.status|lower }}">
+                            {{ maquina.status }}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <a href="/editar_maquina/{{ maquina.id }}" class="btn btn-sm btn-primary">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="/excluir_maquina/{{ maquina.id }}" 
+                               class="btn btn-sm btn-danger"
+                               onclick="return confirm('Excluir {{ maquina.nome }}?')">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
 
-<table>
-    <tr>
-        <th>Nome</th>
-        <th>Setor</th>
-        <th>Status</th>
-        <th>Ações</th>
-    </tr>
-
-    {% for maquina in maquinas %}
-    <tr>
-        <td>{{ maquina.nome }}</td>
-        <td>{{ maquina.setor }}</td>
-
-        <td class="
-            {% if maquina.status == 'Ligada' %}status-ligada{% endif %}
-            {% if maquina.status == 'Parada' %}status-parada{% endif %}
-            {% if maquina.status == 'Manutenção' %}status-manutencao{% endif %}
-        ">
-            {{ maquina.status }}
-        </td>
-
-        <td>
-            <a href="/editar_maquina/{{ maquina.id }}">Editar</a> |
-            <a href="/excluir_maquina/{{ maquina.id }}">Excluir</a>
-        </td>
-    </tr>
-    {% endfor %}
-</table>
-
-<br><br>
-
-<h2>Operadores</h2>
-
-<table>
-    <tr>
-        <th>Nome</th>
-        <th>Setor</th>
-        <th>Turno</th>
-        <th>Ações</th>
-    </tr>
-
-    {% for operador in operadores %}
-    <tr>
-        <td>{{ operador.nome }}</td>
-        <td>{{ operador.setor }}</td>
-        <td>{{ operador.turno }}</td>
-
-        <td>
-            <a href="/editar_operador/{{ operador.id }}">Editar</a> |
-            <a href="/excluir_operador/{{ operador.id }}">Excluir</a>
-        </td>
-    </tr>
-    {% endfor %}
-</table>
-
+<!-- Tabela Operadores -->
+<section class="admin-table-section">
+    <h2><i class="fas fa-users-cog"></i> Operadores</h2>
+    <div class="table-wrapper">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Setor</th>
+                    <th>Turno</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for operador in operadores %}
+                <tr>
+                    <td>{{ operador.nome }} <small>ID: {{ operador.id }}</small></td>
+                    <td>{{ operador.setor or '-' }}</td>
+                    <td>
+                        <span class="badge turno-{{ operador.turno|lower }}">
+                            {{ operador.turno }}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <a href="/editar_operador/{{ operador.id }}" class="btn btn-sm btn-primary">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="/excluir_operador/{{ operador.id }}" 
+                               class="btn btn-sm btn-danger"
+                               onclick="return confirm('Excluir {{ operador.nome }}?')">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
 {% endblock %}

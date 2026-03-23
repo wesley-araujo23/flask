@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+
+{% block title %}Produção{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="page-header-content">
+        <div class="page-title">
+            <i class="fas fa-boxes-stacked"></i>
+            <h1>Registro de Produção</h1>
+            <p>Registre a produção diária das máquinas</p>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Produção -->
+<div class="stats-grid">
+    <div class="stat-card stat-primary">
+        <i class="fas fa-chart-line"></i>
+        <span id="totalHoje">0</span>
+        <small>Hoje</small>
+    </div>
+    <div class="stat-card stat-success">
+        <i class="fas fa-calendar-day"></i>
+        <span id="totalSemana">0</span>
+        <small>Semana</small>
+    </div>
+    <div class="stat-card stat-info">
+        <i class="fas fa-calendar-week"></i>
+        <span id="totalMes">0</span>
+        <small>Mês</small>
+    </div>
+    <div class="stat-card stat-warning">
+        <i class="fas fa-trophy"></i>
+        <span id="melhorMaquina">--</span>
+        <small>Melhor Máquina</small>
+    </div>
+</div>
+
+<!-- Form Registrar Produção -->
+<div class="form-card">
+    <form method="POST" id="producaoForm">
+        <div class="form-row">
+            <div class="form-group">
+                <label>🖥️ Máquina</label>
+                <select name="maquina_id" id="maquinaSelect" required>
+                    <option value="">Selecione uma máquina...</option>
+                    {% for maquina in maquinas %}
+                    <option value="{{ maquina.id }}" data-nome="{{ maquina.nome }}">
+                        {{ maquina.nome }} - {{ maquina.setor }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>📦 Quantidade Produzida</label>
+                <input type="number" name="quantidade" id="quantidade" min="1" required>
+            </div>
+            <div class="form-group">
+                <label>⏱️ Tempo (horas)</label>
+                <input type="number" name="tempo" id="tempo" step="0.1" min="0.1" max="24" required>
+            </div>
+            <button type="submit" class="submit-btn">
+                <i class="fas fa-plus-circle"></i> Registrar Produção
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Tabela Produções Recentes -->
+<div class="table-section">
+    <h2>Produções Recentes</h2>
+    {% if producoes %}
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Máquina</th>
+                <th>Quantidade</th>
+                <th>Tempo</th>
+                <th>Data</th>
+                <th>Eficiência</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in producoes[:20] %}
+            <tr>
+                <td>
+                    <strong>{{ p.maquina.nome }}</strong>
+                    <small>{{ p.maquina.setor }}</small>
+                </td>
+                <td><span class="badge success">{{ "{:,}".format(p.quantidade) }}</span></td>
+                <td>{{ "%.1f"|format(p.tempo) }}h</td>
+                <td>{{ p.data.strftime('%d/%m %H:%M') }}</td>
+                <td>
+                    {% set eficiencia = (p.quantidade / p.tempo / 100)|round(1) %}
+                    <span class="badge">{{ eficiencia }} p/h</span>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-box-open"></i>
+        <h3>Nenhum registro de produção</h3>
+        <p>Registre a primeira produção acima!</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Gráfico Produção -->
+<div class="chart-section">
+    <canvas id="producaoChart"></canvas>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+let producaoChart;
+
+// Form submit
+document.getElementById('producaoForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    
+    try {
+        const response = await fetch('/registrar_producao', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (response.ok) {
+            this.reset();
+            location.reload(); // Recarrega para atualizar stats
+        } else {
+            alert('Erro ao registrar produção');
+        }
+    } catch (error) {
+        alert('Erro de conexão');
+    }
+});
+
+// Gráfico (dados mock - substitua por dados reais)
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('producaoChart');
+    if (ctx) {
+        producaoChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'],
+                datasets: [{
+                    label: 'Produção Diária',
+                    data: [1200, 1500, 1800, 1400, 2200, 1900],
+                    borderColor: '#00c853',
+                    backgroundColor: 'rgba(0, 200, 83, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,20 +1,42 @@
 {% extends 'base.html' %}
 
+{% block title %}Editar Máquina{% endblock %}
+
 {% block content %}
+<section class="page-header">
+    <div class="page-header-content">
+        <div class="page-title">
+            <i class="fas fa-edit"></i>
+            <h1>Editar Máquina</h1>
+            <p>{{ maquina.nome }}</p>
+        </div>
+        <a href="/admin" class="btn btn-secondary">← Voltar</a>
+    </div>
+</section>
 
-<h1>Editar Máquina</h1>
-
-<form method="POST">
-    <input name="nome" value="{{ maquina.nome }}" required>
-    <input name="setor" value="{{ maquina.setor }}" required>
-
-    <select name="status">
-        <option {% if maquina.status == 'Ligada' %}selected{% endif %}>Ligada</option>
-        <option {% if maquina.status == 'Parada' %}selected{% endif %}>Parada</option>
-        <option {% if maquina.status == 'Manutenção' %}selected{% endif %}>Manutenção</option>
-    </select>
-
-    <button type="submit">Salvar</button>
-</form>
-
+<div class="form-card">
+    <form method="POST">
+        <div class="form-row">
+            <div class="form-group">
+                <label>🔧 Nome</label>
+                <input type="text" name="nome" value="{{ maquina.nome }}" required>
+            </div>
+            <div class="form-group">
+                <label>🏭 Setor</label>
+                <input type="text" name="setor" value="{{ maquina.setor }}" required>
+            </div>
+            <div class="form-group">
+                <label>📊 Status</label>
+                <select name="status">
+                    <option value="Ligada" {% if maquina.status == 'Ligada' %}selected{% endif %}>🟢 Ligada</option>
+                    <option value="Parada" {% if maquina.status == 'Parada' %}selected{% endif %}>🔴 Parada</option>
+                    <option value="Manutenção" {% if maquina.status == 'Manutenção' %}selected{% endif %}>🟡 Manutenção</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <button type="submit" class="submit-btn">💾 Salvar Alterações</button>
+            </div>
+        </div>
+    </form>
+</div>
 {% endblock %}
