@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}Login Admin{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-logo">
+            <i class="fas fa-shield-alt fa-3x" style="color: #00c853;"></i>
+            <h1>Painel Admin</h1>
+        </div>
+        
+        <!-- ALERTAS FLASH -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'danger' else 'success' }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <form method="POST">
+            <div class="form-group">
+                <label>👤 Usuário</label>
+                <input type="text" name="user" placeholder="admin" required autofocus>
+            </div>
+            <div class="form-group">
+                <label>🔒 Senha</label>
+                <input type="password" name="pass" placeholder="123456" required>
+            </div>
+            <button type="submit" class="submit-btn">Entrar</button>
+        </form>
+        
+        <div class="text-center mt-3">
+            <a href="{{ url_for('main.dashboard') }}" class="back-link">← Voltar ao Dashboard</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
