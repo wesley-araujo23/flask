@@ -585,3 +585,41 @@ def not_found(error):
 def internal_error(error):
     db.session.rollback()
     return render_template('500.html'), 500
+
+# =====================================================================
+# MÁQUINAS - LISTA E CRUD PÚBLICO
+# =====================================================================
+@main.route('/maquinas')
+def maquinas_view():
+    """Lista todas as máquinas (público)"""
+    maquinas = Maquina.query.order_by(Maquina.nome).all()
+    
+    # Estatísticas
+    stats = {
+        'total': len(maquinas),
+        'ligadas': len([m for m in maquinas if m.status == 'Ligada']),
+        'paradas': len([m for m in maquinas if m.status == 'Parada']),
+        'manutencao': len([m for m in maquinas if m.status == 'Manutenção'])
+    }
+    
+    return render_template('maquinas.html', 
+                         maquinas=maquinas, 
+                         stats=stats)
+
+@main.route('/maquina/<int:id>')
+def maquina_detalhes(id):
+    """Detalhes da máquina"""
+    maquina = Maquina.query.get_or_404(id)
+    
+    # Estatísticas
+    tempo_total = sum(p.tempo for p in maquina.producoes) if maquina.producoes else 0
+    total_produzido = sum(p.quantidade for p in maquina.producoes) if maquina.producoes else 0
+    produtividade = total_produzido / tempo_total if tempo_total > 0 else 0
+    manutencoes_pendentes = [m for m in maquina.manutencoes if not m.resolvida]
+    
+    return render_template('maquina_detalhes.html', 
+                         maquina=maquina,
+                         tempo_total=tempo_total,
+                         total_produzido=total_produzido,
+                         produtividade=produtividade,
+                         manutencoes_pendentes=manutencoes_pendentes)
