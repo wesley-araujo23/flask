@@ -1,0 +1,16 @@
+{
+    "name": "Sistema Industrial",
+    "short_name": "Industrial",
+    "description": "Dashboard de Produção Industrial",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#0a0e17",
+    "theme_color": "#00d4aa",
+    "icons": [
+        {
+            "src": "/static/images/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        }
+    ]
+}

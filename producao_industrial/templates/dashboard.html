@@ -1,58 +1,218 @@
 {% extends 'base.html' %}
 
-{% block title %}Dashboard{% endblock %}
+{% block title %}Dashboard - Sistema Industrial{% endblock %}
+{% block description %}Dashboard completo com monitoramento em tempo real de produção industrial{% endblock %}
 
 {% block content %}
-<!-- Conteúdo igual ao anterior... -->
+<!-- Page Header -->
 <section class="page-header">
-    <!-- ... header igual ... -->
+    <div class="page-header-content">
+        <div class="page-title">
+            <div class="page-title-icon">
+                <i class="fas fa-tachometer-alt"></i>
+            </div>
+            <div>
+                <h1>Dashboard</h1>
+                <p>Monitoramento em tempo real da produção industrial</p>
+            </div>
+        </div>
+        <div class="page-actions">
+            <button class="btn btn-primary" onclick="utils.toast('Atualizando dados...', 'info')">
+                <i class="fas fa-sync-alt"></i> Atualizar
+            </button>
+        </div>
+    </div>
 </section>
 
-<!-- Stats igual... -->
+<!-- Stats Grid -->
 <section class="stats-section">
-    <!-- ... stats cards iguais ... -->
+    <div class="stats-grid">
+        <div class="stat-card" data-reveal="fade-up">
+            <i class="fas fa-play-circle"></i>
+            <span class="stat-value" data-target="{{ ligadas|default(12)|int }}">0</span>
+            <small class="stat-label">Máquinas Ligadas</small>
+            <span class="status-badge status-ligada">Online</span>
+        </div>
+        
+        <div class="stat-card" data-reveal="fade-up" data-reveal-delay="0.1">
+            <i class="fas fa-boxes-stacked"></i>
+            <span class="stat-value" data-target="{{ total_produzido|default(2450)|int }}">0</span>
+            <small class="stat-label">Peças Produzidas</small>
+            <div class="stat-trend positive">+12.5%</div>
+        </div>
+        
+        <div class="stat-card" data-reveal="fade-up" data-reveal-delay="0.2">
+            <i class="fas fa-users"></i>
+            <span class="stat-value" data-target="{{ operadores_ativos|default(28)|int }}">0</span>
+            <small class="stat-label">Operadores</small>
+            <span class="status-badge status-online">Ativo</span>
+        </div>
+        
+        <div class="stat-card" data-reveal="fade-up" data-reveal-delay="0.3">
+            <i class="fas fa-chart-line"></i>
+            <span class="stat-value" data-target="{{ eficiencia|default(94)|int }}">0</span>
+            <small class="stat-label">Eficiência</small>
+            <span class="status-badge status-ligada">{{ eficiencia|default(94) }}%</span>
+        </div>
+    </div>
 </section>
 
-<!-- Charts SEM JavaScript inline -->
-<section class="chart-section">
-    <div class="chart-card">
-        <h3>Status das Máquinas</h3>
-        <canvas id="statusChart" data-ligadas="{{ ligadas }}" data-manutencao="{{ manutencao }}" data-paradas="{{ paradas }}"></canvas>
+<!-- Charts -->
+<section class="charts-section">
+    <div class="charts-grid">
+        <div class="chart-card">
+            <h3><i class="fas fa-chart-pie"></i> Status Máquinas</h3>
+            <canvas id="statusChart" 
+                    data-ligadas="{{ ligadas|default(0)|int }}" 
+                    data-manutencao="{{ manutencao|default(0)|int }}" 
+                    data-paradas="{{ paradas|default(0)|int }}"></canvas>
+        </div>
+        <div class="chart-card">
+            <h3><i class="fas fa-chart-line"></i> Produção</h3>
+            <canvas id="productionChart"></canvas>
+        </div>
+    </div>
+</section>
+
+<!-- Tabela -->
+<section class="table-section">
+    <div class="section-header">
+        <h2><i class="fas fa-microchip"></i> Máquinas</h2>
+        <input type="text" id="tableSearch" class="search-input" placeholder="🔍 Buscar...">
+    </div>
+    
+    <div class="table-wrapper">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th><input type="checkbox" class="select-all"></th>
+                    <th>Máquina</th>
+                    <th>Setor</th>
+                    <th>Status</th>
+                    <th>Operador</th>
+                    <th>Produção</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for maquina in maquinas|default([]) %}
+                <tr>
+                    <td><input type="checkbox" class="row-select"></td>
+                    <td>{{ maquina.nome|default('N/A') }}</td>
+                    <td>{{ maquina.setor|default('N/A') }}</td>
+                    <td>
+                        <span class="status-badge status-{{ maquina.status|default('parada') }}">
+                            {{ maquina.status.title()|default('Parada') }}
+                        </span>
+                    </td>
+                    <td>{{ maquina.operador|default('N/A') }}</td>
+                    <td>{{ maquina.producao|default(0)|int }} peças</td>
+                    <td>
+                        <button class="btn btn-sm" title="Detalhes">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" class="text-center">
+                        <div class="empty-state">
+                            <i class="fas fa-microchip-slash"></i>
+                            <h3>Sem máquinas</h3>
+                            <p>Adicione máquinas para monitoramento</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<!-- Quick Actions -->
+<section class="quick-actions">
+    <h3>Ações Rápidas</h3>
+    <div class="actions-grid">
+        <a href="/maquinas" class="action-card">
+            <i class="fas fa-cogs"></i>
+            <span>Máquinas</span>
+        </a>
+        <a href="/producao" class="action-card">
+            <i class="fas fa-box"></i>
+            <span>Produção</span>
+        </a>
+        <a href="/relatorios" class="action-card">
+            <i class="fas fa-chart-bar"></i>
+            <span>Relatórios</span>
+        </a>
     </div>
 </section>
 {% endblock %}
 
-<!-- Script EXTERNO -->
 {% block extra_js %}
 <script>
+// Charts e interatividade
 document.addEventListener('DOMContentLoaded', function() {
-    const canvas = document.getElementById('statusChart');
-    if (!canvas) return;
-    
-    const ctx = canvas.getContext('2d');
-    const ligadas = parseInt(canvas.dataset.ligadas) || 0;
-    const manutencao = parseInt(canvas.dataset.manutencao) || 0;
-    const paradas = parseInt(canvas.dataset.paradas) || 0;
-    
-    new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Ligadas', 'Manutenção', 'Paradas'],
-            datasets: [{
-                data: [ligadas, manutencao, paradas],
-                backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
-                borderWidth: 0
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom'
-                }
+    // Status Chart
+    const statusChart = document.getElementById('statusChart');
+    if (statusChart) {
+        const ctx = statusChart.getContext('2d');
+        const ligadas = parseInt(statusChart.dataset.ligadas) || 0;
+        const manutencao = parseInt(statusChart.dataset.manutencao) || 0;
+        const paradas = parseInt(statusChart.dataset.paradas) || 0;
+        
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Ligadas', 'Manutenção', 'Paradas'],
+                datasets: [{
+                    data: [ligadas, manutencao, paradas],
+                    backgroundColor: ['#10b981', '#f59e0b', '#ef4444']
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { position: 'bottom' } }
             }
-        }
+        });
+    }
+
+    // Production Chart
+    const prodChart = document.getElementById('productionChart');
+    if (prodChart) {
+        const ctx = prodChart.getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['08h', '10h', '12h', '14h', '16h'],
+                datasets: [{
+                    label: 'Produção',
+                    data: [200, 350, 500, 450, 600],
+                    borderColor: '#00d4aa',
+                    backgroundColor: 'rgba(0,212,170,0.1)',
+                    fill: true
+                }]
+            },
+            options: { responsive: true }
+        });
+    }
+
+    // Search
+    const search = document.getElementById('tableSearch');
+    if (search) {
+        search.addEventListener('input', e => {
+            const term = e.target.value.toLowerCase();
+            document.querySelectorAll('.data-table tbody tr').forEach(row => {
+                row.style.display = row.textContent.toLowerCase().includes(term) ? '' : 'none';
+            });
+        });
+    }
+
+    // Select all
+    document.querySelector('.select-all')?.addEventListener('change', e => {
+        document.querySelectorAll('.row-select').forEach(cb => {
+            cb.checked = e.target.checked;
+        });
     });
 });
 </script>

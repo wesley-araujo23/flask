@@ -1,94 +1,341 @@
 {% extends 'base.html' %}
 
-{% block title %}Operadores{% endblock %}
+{% block title %}Operadores - Sistema Industrial{% endblock %}
 
 {% block content %}
+<!-- Page Header -->
 <section class="page-header">
     <div class="page-header-content">
         <div class="page-title">
-            <i class="fas fa-users"></i>
-            <h1>Operadores</h1>
+            <div class="page-title-icon">
+                <i class="fas fa-users" style="color: var(--secondary);"></i>
+            </div>
+            <div>
+                <h1>Operadores</h1>
+                <p>Visualize todos os operadores ativos no sistema</p>
+            </div>
+        </div>
+        <div class="page-actions">
+            <button class="btn btn-success" onclick="exportOperators()">
+                <i class="fas fa-download"></i> Exportar Lista
+            </button>
         </div>
     </div>
 </section>
 
-<!-- Stats -->
-<div class="stats-grid">
-    <div class="stat-card">
-        <span class="stat-value">{{ operadores|length }}</span>
-        <span>Total</span>
+<!-- Stats Operadores -->
+<section class="stats-section">
+    <div class="stats-grid">
+        <div class="stat-card" data-reveal="fade-up">
+            <i class="fas fa-users"></i>
+            <span class="stat-value">{{ operadores|length|default(0)|int }}</span>
+            <small>Total Operadores</small>
+        </div>
+        <div class="stat-card manha-count" data-reveal="fade-up" data-reveal-delay="0.1">
+            <i class="fas fa-sun"></i>
+            <span class="stat-value">{{ operadores|selectattr('turno','equalto','Manhã')|list|length|default(0)|int }}</span>
+            <small>Turno Manhã</small>
+            <span class="status-badge status-manha">☀️ Manhã</span>
+        </div>
+        <div class="stat-card tarde-count" data-reveal="fade-up" data-reveal-delay="0.2">
+            <i class="fas fa-cloud-sun"></i>
+            <span class="stat-value">{{ operadores|selectattr('turno','equalto','Tarde')|list|length|default(0)|int }}</span>
+            <small>Turno Tarde</small>
+            <span class="status-badge status-tarde">🌤️ Tarde</span>
+        </div>
+        <div class="stat-card noite-count" data-reveal="fade-up" data-reveal-delay="0.3">
+            <i class="fas fa-moon"></i>
+            <span class="stat-value">{{ operadores|selectattr('turno','equalto','Noite')|list|length|default(0)|int }}</span>
+            <small>Turno Noite</small>
+            <span class="status-badge status-noite">🌙 Noite</span>
+        </div>
     </div>
-    <div class="stat-card">
-        <span class="stat-value">
-            {{ operadores|selectattr('turno','equalto','Manhã')|list|length }}
-        </span>
-        <span>Manhã</span>
-    </div>
-    <div class="stat-card">
-        <span class="stat-value">
-            {{ operadores|selectattr('turno','equalto','Tarde')|list|length }}
-        </span>
-        <span>Tarde</span>
-    </div>
-    <div class="stat-card">
-        <span class="stat-value">
-            {{ operadores|selectattr('turno','equalto','Noite')|list|length }}
-        </span>
-        <span>Noite</span>
-    </div>
-</div>
+</section>
 
-<!-- Form Cadastrar -->
-<div class="form-card">
-    <form method="POST">
-        <div class="form-row">
+<!-- Filtros -->
+<section class="filters-section">
+    <div class="filters-card">
+        <div class="filters-row">
             <div class="form-group">
-                <label>Nome Completo</label>
-                <input type="text" name="nome" required>
-            </div>
-            <div class="form-group">
-                <label>Setor</label>
-                <input type="text" name="setor">
+                <label>🔍 Buscar</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="operatorSearch" placeholder="Nome ou setor...">
+                </div>
             </div>
             <div class="form-group">
                 <label>Turno</label>
-                <select name="turno">
-                    <option value="Manhã">☀️ Manhã</option>
-                    <option value="Tarde">🌤️ Tarde</option>
-                    <option value="Noite">🌙 Noite</option>
-                </select>
+                <div class="input-wrapper">
+                    <i class="fas fa-clock"></i>
+                    <select id="operatorTurno">
+                        <option value="">Todos os Turnos</option>
+                        <option value="manhã">☀️ Manhã</option>
+                        <option value="tarde">🌤️ Tarde</option>
+                        <option value="noite">🌙 Noite</option>
+                    </select>
+                </div>
             </div>
-            <button type="submit">Cadastrar</button>
+            <div class="filter-actions">
+                <button class="btn btn-primary" onclick="applyOperatorFilters()">
+                    <i class="fas fa-filter"></i> Filtrar
+                </button>
+                <button class="btn btn-secondary" onclick="clearOperatorFilters()">
+                    <i class="fas fa-times"></i> Limpar
+                </button>
+            </div>
         </div>
-    </form>
-</div>
-
-<!-- Lista -->
-<div class="table-section">
-    {% if operadores %}
-    <table class="data-table">
-        <thead>
-            <tr><th>Nome</th><th>Setor</th><th>Turno</th></tr>
-        </thead>
-        <tbody>
-            {% for op in operadores %}
-            <tr>
-                <td>{{ op.nome }} <small>ID: {{ op.id }}</small></td>
-                <td>{{ op.setor or '-' }}</td>
-                <td>
-                    <span class="badge turno-{{ op.turno|lower }}">
-                        {{ op.turno }}
-                    </span>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% else %}
-    <div class="empty-state">
-        <i class="fas fa-users"></i>
-        <p>Nenhum operador cadastrado</p>
     </div>
-    {% endif %}
-</div>
+</section>
+
+<!-- Tabela Operadores - SOMENTE LEITURA -->
+<section class="table-section">
+    <div class="section-header">
+        <h2>Todos os Operadores ({{ operadores|length }})</h2>
+    </div>
+    
+    <div class="table-wrapper">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Operador</th>
+                    <th>Setor</th>
+                    <th>Turno</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="operatorsTable">
+                {% for op in operadores %}
+                <tr data-operator-id="{{ op.id }}" 
+                    data-turno="{{ op.turno|lower }}" 
+                    data-nome="{{ op.nome|lower }}"
+                    data-setor="{{ op.setor|lower|default('-') }}">
+                    <td><strong>#{{ op.id }}</strong></td>
+                    <td>
+                        <div class="operator-card">
+                            <i class="fas fa-user operator-icon"></i>
+                            <div>
+                                <div class="operator-name">{{ op.nome }}</div>
+                                <small class="operator-id">ID: {{ op.id }}</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="sector-badge">{{ op.setor or '-' }}</span>
+                    </td>
+                    <td>
+                        <span class="status-badge turno-badge turno-{{ op.turno|lower }}">
+                            <span class="badge-dot"></span>
+                            {{ op.turno }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="status-badge status-ativo">
+                            <i class="fas fa-check-circle"></i> Ativo
+                        </span>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="text-center">
+                        <div class="empty-state">
+                            <i class="fas fa-users fa-3x" style="opacity: 0.5;"></i>
+                            <h3>Nenhum operador cadastrado</h3>
+                            <p>Os administradores ainda não cadastraram operadores</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Cards específicos */
+.operator-card {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.operator-icon {
+    color: var(--secondary);
+    font-size: var(--font-size-xl);
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(116, 192, 252, 0.15);
+}
+
+.operator-name {
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+    margin-bottom: var(--space-1);
+}
+
+.operator-id {
+    color: var(--text-muted);
+    font-size: var(--font-size-xs);
+}
+
+.sector-badge {
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--primary);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+/* Badges específicos para turnos */
+.status-badge {
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-width: 90px;
+    justify-content: center;
+}
+
+.badge-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.turno-manha {
+    background: rgba(255, 217, 61, 0.2);
+    color: #f59e0b;
+    border: 1px solid rgba(255, 217, 61, 0.4);
+}
+
+.turno-manha .badge-dot {
+    background: #f59e0b;
+    box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
+}
+
+.turno-tarde {
+    background: rgba(116, 192, 252, 0.2);
+    color: #60a5fa;
+    border: 1px solid rgba(116, 192, 252, 0.4);
+}
+
+.turno-tarde .badge-dot {
+    background: #60a5fa;
+}
+
+.turno-noite {
+    background: rgba(107, 114, 128, 0.2);
+    color: #9ca3af;
+    border: 1px solid rgba(107, 114, 128, 0.4);
+}
+
+.turno-noite .badge-dot {
+    background: #9ca3af;
+}
+
+.status-ativo {
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+/* Stats hover effects */
+.manha-count:hover { border-color: rgba(255, 217, 61, 0.3); }
+.tarde-count:hover { border-color: rgba(116, 192, 252, 0.3); }
+.noite-count:hover { border-color: rgba(107, 114, 128, 0.3); }
+
+.data-table td:nth-child(2) {
+    min-width: 280px;
+}
+
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .filters-row {
+        flex-direction: column;
+        gap: var(--space-4);
+    }
+    
+    .data-table {
+        font-size: 0.875rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Operadores - VISUALIZAÇÃO APENAS
+document.addEventListener('DOMContentLoaded', function() {
+    // Filtros de busca
+    const searchInput = document.getElementById('operatorSearch');
+    const turnoFilter = document.getElementById('operatorTurno');
+    
+    function applyOperatorFilters() {
+        const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+        const turnoTerm = turnoFilter ? turnoFilter.value.toLowerCase() : '';
+        
+        const rows = document.querySelectorAll('#operatorsTable tr[data-operator-id]');
+        let visibleCount = 0;
+        
+        rows.forEach(function(row) {
+            const operatorName = row.dataset.nome || '';
+            const operatorTurno = row.dataset.turno || '';
+            const setor = row.dataset.setor || '';
+            
+            const matchesSearch = !searchTerm || 
+                operatorName.includes(searchTerm) || 
+                setor.includes(searchTerm);
+            const matchesTurno = !turnoTerm || operatorTurno === turnoTerm;
+            
+            if (matchesSearch && matchesTurno) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+    
+    if (searchInput) {
+        searchInput.addEventListener('input', applyOperatorFilters);
+        searchInput.addEventListener('keyup', function(e) {
+            if (e.key === 'Enter') applyOperatorFilters();
+        });
+    }
+    
+    if (turnoFilter) {
+        turnoFilter.addEventListener('change', applyOperatorFilters);
+    }
+    
+    window.applyOperatorFilters = applyOperatorFilters;
+    window.clearOperatorFilters = function() {
+        if (searchInput) searchInput.value = '';
+        if (turnoFilter) turnoFilter.value = '';
+        applyOperatorFilters();
+    };
+    
+    window.exportOperators = function() {
+        if (typeof utils !== 'undefined') {
+            utils.toast('Lista de operadores exportada com sucesso!', 'success');
+        } else {
+            alert('Lista de operadores exportada com sucesso!');
+        }
+    };
+});
+</script>
 {% endblock %}

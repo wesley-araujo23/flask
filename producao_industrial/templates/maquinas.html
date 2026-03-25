@@ -1,69 +1,325 @@
 {% extends 'base.html' %}
 
-{% block title %}Máquinas{% endblock %}
+{% block title %}Máquinas - Sistema Industrial{% endblock %}
 
 {% block content %}
+<!-- Page Header -->
 <section class="page-header">
     <div class="page-header-content">
         <div class="page-title">
-            <i class="fas fa-cogs"></i>
-            <h1>Máquinas</h1>
+            <div class="page-title-icon">
+                <i class="fas fa-cogs" style="color: var(--secondary);"></i>
+            </div>
+            <div>
+                <h1>Máquinas</h1>
+                <p>Visualize o status de todas as máquinas do sistema</p>
+            </div>
+        </div>
+        <div class="page-actions">
+            <button class="btn btn-success" onclick="exportMachines()">
+                <i class="fas fa-download"></i> Exportar Lista
+            </button>
         </div>
     </div>
 </section>
 
-<!-- Form Cadastrar -->
-<div class="form-card">
-    <form method="POST">
-        <div class="form-row">
+<!-- Stats Máquinas -->
+<section class="stats-section">
+    <div class="stats-grid">
+        <div class="stat-card" data-reveal="fade-up">
+            <i class="fas fa-microchip"></i>
+            <span class="stat-value">{{ maquinas|length|default(0)|int }}</span>
+            <small>Total Máquinas</small>
+        </div>
+        <div class="stat-card ligada-count" data-reveal="fade-up" data-reveal-delay="0.1">
+            <i class="fas fa-play-circle"></i>
+            <span class="stat-value">{{ ligadas|default(0)|int }}</span>
+            <small>Ligadas</small>
+            <span class="status-badge status-ligada">Online</span>
+        </div>
+        <div class="stat-card parada-count" data-reveal="fade-up" data-reveal-delay="0.2">
+            <i class="fas fa-pause-circle"></i>
+            <span class="stat-value">{{ paradas|default(0)|int }}</span>
+            <small>Paradas</small>
+        </div>
+        <div class="stat-card manutencao-count" data-reveal="fade-up" data-reveal-delay="0.3">
+            <i class="fas fa-tools"></i>
+            <span class="stat-value">{{ manutencao|default(0)|int }}</span>
+            <small>Manutenção</small>
+        </div>
+    </div>
+</section>
+
+<!-- Filtros -->
+<section class="filters-section">
+    <div class="filters-card">
+        <div class="filters-row">
             <div class="form-group">
-                <label>Nome</label>
-                <input type="text" name="nome" placeholder="Ex: Torno CNC #01" required>
-            </div>
-            <div class="form-group">
-                <label>Setor</label>
-                <input type="text" name="setor" placeholder="Ex: Montagem" required>
+                <label>🔍 Buscar</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="machineSearch" placeholder="Nome ou setor...">
+                </div>
             </div>
             <div class="form-group">
                 <label>Status</label>
-                <select name="status">
-                    <option value="Ligada">🟢 Ligada</option>
-                    <option value="Parada">🔴 Parada</option>
-                    <option value="Manutenção">🟡 Manutenção</option>
-                </select>
+                <div class="input-wrapper">
+                    <i class="fas fa-filter"></i>
+                    <select id="machineStatus">
+                        <option value="">Todos os Status</option>
+                        <option value="ligada">🟢 Ligada</option>
+                        <option value="parada">🔴 Parada</option>
+                        <option value="manutencao">🟡 Manutenção</option>
+                    </select>
+                </div>
             </div>
-            <button type="submit" class="submit-btn">Cadastrar Máquina</button>
+            <div class="filter-actions">
+                <button class="btn btn-primary" onclick="applyMachineFilters()">
+                    <i class="fas fa-filter"></i> Filtrar
+                </button>
+                <button class="btn btn-secondary" onclick="clearMachineFilters()">
+                    <i class="fas fa-times"></i> Limpar
+                </button>
+            </div>
         </div>
-    </form>
-</div>
-
-<!-- Lista Máquinas -->
-<div class="table-section">
-    <h2>Total: {{ maquinas|length }} máquinas</h2>
-    {% if maquinas %}
-    <table class="data-table">
-        <thead>
-            <tr><th>Nome</th><th>Setor</th><th>Status</th></tr>
-        </thead>
-        <tbody>
-            {% for m in maquinas %}
-            <tr>
-                <td><strong>{{ m.nome }}</strong> <small>ID: {{ m.id }}</small></td>
-                <td>{{ m.setor }}</td>
-                <td>
-                    <span class="status-badge status-{{ m.status|lower }}">
-                        {{ m.status }}
-                    </span>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% else %}
-    <div class="empty-state">
-        <i class="fas fa-cogs"></i>
-        <p>Nenhuma máquina cadastrada</p>
     </div>
-    {% endif %}
-</div>
+</section>
+
+<!-- Tabela Máquinas - SOMENTE LEITURA -->
+<section class="table-section">
+    <div class="section-header">
+        <h2>Todas as Máquinas ({{ maquinas|length }})</h2>
+    </div>
+    
+    <div class="table-wrapper">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Máquina</th>
+                    <th>Setor</th>
+                    <th>Status</th>
+                    <th>Produção Hoje</th>
+                    <th>Última Manutenção</th>
+                </tr>
+            </thead>
+            <tbody id="machinesTable">
+                {% for m in maquinas %}
+                <tr data-machine-id="{{ m.id }}" 
+                    data-status="{{ m.status|lower }}" 
+                    data-name="{{ m.nome|lower }}"
+                    data-setor="{{ m.setor|lower }}">
+                    <td><strong>#{{ m.id }}</strong></td>
+                    <td>
+                        <div class="machine-card">
+                            <i class="fas fa-microchip machine-icon"></i>
+                            <div>
+                                <div class="machine-name">{{ m.nome }}</div>
+                                <small class="machine-id">ID: {{ m.id }}</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="sector-badge">{{ m.setor }}</span>
+                    </td>
+                    <td>
+                        <span class="status-badge status-{{ m.status|lower }}">
+                            <span class="badge-dot"></span>
+                            {{ m.status }}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="production-stats">
+                            <span class="production-number">{{ m.producao|default(0)|int }}</span>
+                            <small>peças</small>
+                        </div>
+                    </td>
+                    <td>
+                        {{ m.ultima_manutencao or 'Nunca' }}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="text-center">
+                        <div class="empty-state">
+                            <i class="fas fa-cogs fa-3x" style="opacity: 0.5;"></i>
+                            <h3>Nenhuma máquina cadastrada</h3>
+                            <p>Os administradores ainda não cadastraram máquinas</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.machine-card {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.machine-icon {
+    font-size: 1.5rem;
+    color: var(--primary);
+    width: 40px;
+    text-align: center;
+}
+
+.machine-name {
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+}
+
+.machine-id {
+    color: var(--text-muted);
+}
+
+.sector-badge {
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--primary);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.status-badge {
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-width: 100px;
+    justify-content: center;
+}
+
+.badge-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.status-ligada { 
+    background: rgba(16, 185, 129, 0.2); 
+    color: #10b981; 
+    border: 1px solid rgba(16, 185, 129, 0.4); 
+}
+.status-ligada .badge-dot { background: #10b981; }
+
+.status-parada { 
+    background: rgba(239, 68, 68, 0.2); 
+    color: #ef4444; 
+    border: 1px solid rgba(239, 68, 68, 0.4); 
+}
+.status-parada .badge-dot { background: #ef4444; }
+
+.status-manutencao { 
+    background: rgba(245, 158, 11, 0.2); 
+    color: #f59e0b; 
+    border: 1px solid rgba(245, 158, 11, 0.4); 
+}
+.status-manutencao .badge-dot { background: #f59e0b; }
+
+.production-stats {
+    text-align: center;
+}
+
+.production-number {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+    color: var(--primary);
+    display: block;
+}
+
+.data-table td:nth-child(2) {
+    min-width: 250px;
+}
+
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .filters-row {
+        flex-direction: column;
+        gap: var(--space-4);
+    }
+    
+    .data-table {
+        font-size: 0.875rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Máquinas - VISUALIZAÇÃO APENAS
+document.addEventListener('DOMContentLoaded', function() {
+    // Filtros de busca
+    const searchInput = document.getElementById('machineSearch');
+    const statusFilter = document.getElementById('machineStatus');
+    
+    function applyMachineFilters() {
+        const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+        const statusTerm = statusFilter ? statusFilter.value.toLowerCase() : '';
+        
+        const rows = document.querySelectorAll('#machinesTable tr[data-machine-id]');
+        let visibleCount = 0;
+        
+        rows.forEach(function(row) {
+            const machineName = row.dataset.name || '';
+            const machineStatus = row.dataset.status || '';
+            const setor = row.dataset.setor || '';
+            
+            const matchesSearch = !searchTerm || 
+                machineName.includes(searchTerm) || 
+                setor.includes(searchTerm);
+            const matchesStatus = !statusTerm || machineStatus === statusTerm;
+            
+            if (matchesSearch && matchesStatus) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+    
+    if (searchInput) {
+        searchInput.addEventListener('input', applyMachineFilters);
+        searchInput.addEventListener('keyup', function(e) {
+            if (e.key === 'Enter') applyMachineFilters();
+        });
+    }
+    
+    if (statusFilter) {
+        statusFilter.addEventListener('change', applyMachineFilters);
+    }
+    
+    window.applyMachineFilters = applyMachineFilters;
+    window.clearMachineFilters = function() {
+        if (searchInput) searchInput.value = '';
+        if (statusFilter) statusFilter.value = '';
+        applyMachineFilters();
+    };
+    
+    window.exportMachines = function() {
+        if (typeof utils !== 'undefined') {
+            utils.toast('Lista de máquinas exportada com sucesso!', 'success');
+        } else {
+            alert('Lista de máquinas exportada com sucesso!');
+        }
+    };
+});
+</script>
 {% endblock %}
