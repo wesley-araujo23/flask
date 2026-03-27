@@ -15,17 +15,13 @@
                 <p>Análises completas do sistema industrial</p>
             </div>
         </div>
-        <div class="page-actions">
-            <a href="/gerar_pdf" class="btn btn-danger" target="_blank">
-                <i class="fas fa-file-pdf"></i> Exportar PDF
-            </a>
-            <a href="/gerar_excel" class="btn btn-success" target="_blank">
-                <i class="fas fa-file-excel"></i> Exportar Excel
-            </a>
-        </div>
-    </div>
-</section>
-
+<!-- ✅ DEPOIS (CORRETO) -->
+<a href="{{ url_for('main.relatorios_pdf') }}" class="btn btn-danger" target="_blank">
+    <i class="fas fa-file-pdf"></i> Exportar PDF
+</a>
+<a href="{{ url_for('main.relatorios_excel') }}" class="btn btn-success">
+    <i class="fas fa-file-excel"></i> Exportar Excel
+</a>
 <!-- Stats Overview -->
 <section class="stats-section">
     <div class="stats-grid">
